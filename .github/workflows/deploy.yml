@@ -11,6 +11,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: pages-${{ github.ref }}
@@ -52,6 +53,25 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Keep only one Pages artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          mapfile -t artifact_ids < <(
+            gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" \
+              --jq '.artifacts | map(select(.name == "github-pages")) | sort_by(.id) | reverse | .[].id'
+          )
+
+          echo "Found ${#artifact_ids[@]} github-pages artifact(s)."
+
+          if (( ${#artifact_ids[@]} > 1 )); then
+            echo "GitHub created duplicate Pages artifacts; keeping ${artifact_ids[0]} and deleting the rest."
+            for artifact_id in "${artifact_ids[@]:1}"; do
+              gh api --method DELETE "repos/${GITHUB_REPOSITORY}/actions/artifacts/${artifact_id}"
+            done
+          fi
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
