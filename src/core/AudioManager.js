@@ -46,29 +46,30 @@ export class AudioManager {
     type = 'sine',
     volume = 0.08,
     endFrequency = null,
+    delay = 0,
   } = {}) {
     const context = await this.ensureContext();
     if (!context) return;
 
-    const now = context.currentTime;
+    const startAt = context.currentTime + delay;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
 
     oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, now);
+    oscillator.frequency.setValueAtTime(frequency, startAt);
     if (endFrequency) {
-      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + duration);
+      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
     }
 
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(volume, now + 0.015);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
 
     oscillator.connect(gain);
     gain.connect(context.destination);
 
-    oscillator.start(now);
-    oscillator.stop(now + duration + 0.02);
+    oscillator.start(startAt);
+    oscillator.stop(startAt + duration + 0.02);
   }
 
   playTap() {
@@ -76,13 +77,10 @@ export class AudioManager {
   }
 
   playSuccess() {
+    // Lập lịch trên Web Audio timeline, không tạo setTimeout rơi rớt khi đổi màn hình.
     this.playTone({ frequency: 523.25, duration: 0.16, volume: 0.06 });
-    window.setTimeout(() => {
-      this.playTone({ frequency: 659.25, duration: 0.16, volume: 0.06 });
-    }, 120);
-    window.setTimeout(() => {
-      this.playTone({ frequency: 783.99, duration: 0.22, volume: 0.07 });
-    }, 240);
+    this.playTone({ frequency: 659.25, duration: 0.16, volume: 0.06, delay: 0.12 });
+    this.playTone({ frequency: 783.99, duration: 0.22, volume: 0.07, delay: 0.24 });
   }
 
   playPlanet() {
