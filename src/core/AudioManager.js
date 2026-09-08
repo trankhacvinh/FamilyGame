@@ -93,6 +93,26 @@ export class AudioManager {
     });
   }
 
+  playCrack() {
+    this.playTone({ frequency: 165, endFrequency: 92, duration: 0.12, type: 'square', volume: 0.045 });
+    this.playTone({ frequency: 640, endFrequency: 260, duration: 0.055, type: 'triangle', volume: 0.025, delay: 0.025 });
+  }
+
+  playReveal() {
+    this.playTone({ frequency: 330, endFrequency: 660, duration: 0.24, type: 'triangle', volume: 0.05 });
+    this.playTone({ frequency: 660, endFrequency: 990, duration: 0.22, type: 'sine', volume: 0.04, delay: 0.13 });
+  }
+
+  playWrong() {
+    return this.playTone({
+      frequency: 250,
+      endFrequency: 105,
+      duration: 0.42,
+      type: 'sawtooth',
+      volume: 0.045,
+    });
+  }
+
   registerSample(name, url) {
     this.samples.set(name, { url, buffer: null });
   }
