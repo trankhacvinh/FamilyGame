@@ -6,12 +6,13 @@ Bộ trò chơi học tập nhẹ, vui nhộn cho trẻ nhỏ, hỗ trợ **Ti�
 
 - 🔺 **Thả Khối Vào Lỗ**: game 3D kéo thả bằng Raycaster, cấu hình được **3 / 4 / 5 / 6 khối**. Hiện có Circle, Square, Triangle, Rectangle, Star và Hexagon; mỗi khối có tên VI/EN.
 - 🪐 **Khám Phá Hệ Mặt Trời**: đủ 8 hành tinh (Sao Thủy → Sao Hải Vương), Mặt Trời, quỹ đạo sin/cos và các visitor ngẫu nhiên như Sao Chổi / Thiên Thạch để bé chạm khám phá.
+- 🪨 **Khảo Cổ Học Nhí**: đập khối đá méo 3D khoảng 5–7 lần để làm nứt/vỡ đá, sau đó chọn 1 trong 3 thumbnail model 3D. Đúng thì fireworks + âm thanh chúc mừng; sai thì có hiệu ứng rung + âm báo. Có 16 vật thể toy-style và nút New để random ván mới.
 - 🔊 Âm thanh Web Audio nhẹ; có thể thay bằng file audio thật qua `AudioManager.registerSample()`.
-- 🗣️ **Read / Đọc**: tùy chọn đọc tên shape, hành tinh, Mặt Trời, Sao Chổi và Thiên Thạch theo ngôn ngữ VI/EN hiện tại bằng Web Speech API. Trạng thái được nhớ giữa các lần chơi.
+- 🗣️ **Read / Đọc**: tùy chọn đọc tên shape, hành tinh, vật thể khảo cổ... theo ngôn ngữ VI/EN hiện tại bằng Web Speech API. Trạng thái được nhớ giữa các lần chơi.
 - ℹ️ **Info / Thông tin (Space)**: khi bật, tap vật thể sẽ mở panel thông tin VI/EN ở bottom; nội dung dài có thể cuộn. Nếu Read cũng bật, game sẽ đọc cả tên + nội dung + facts.
 - 🌐 Chuyển ngôn ngữ VI / EN.
 - 📱 Responsive portrait / landscape, hỗ trợ Pointer Events cho mouse / touch / stylus.
-- ♻️ Cleanup geometry, material, texture, listeners và timer khi đổi màn hình; visitor động trong Space được dispose ngay khi bay khỏi scene.
+- ♻️ Cleanup geometry, material, texture, listeners và timer khi đổi màn hình; các object động được dọn khi New/Back để tránh memory tăng dần.
 - ⚡ Lazy-load từng game bằng dynamic `import()`.
 
 ## Kiến trúc
@@ -30,17 +31,12 @@ src/
 │   └── constants.js
 ├── games/
 │   ├── shapes/
-│   │   ├── ShapesGame.js
-│   │   ├── ShapesSpeechGame.js
-│   │   ├── shapeConfig.js  # catalog shape + cấu hình số lượng 3–6
-│   │   └── shapes.css
-│   └── space/
-│       ├── SpaceGame.js
-│       ├── SpaceSpeechGame.js
-│       ├── SpaceInfoGame.js
-│       ├── spaceConfig.js  # catalog 8 hành tinh + visitor config
-│       ├── spaceInfo.js    # nội dung giáo dục VI/EN
-│       └── spaceInfo.css
+│   ├── space/
+│   └── archaeology/
+│       ├── ArchaeologyGame.js
+│       ├── archaeologyCatalog.js # 16 item + random answers
+│       ├── modelFactory.js       # primitive toy models dùng cho secret + thumbnail 3D
+│       └── archaeology.css
 ├── screens/
 │   └── MenuScreen.js
 ├── ui/
@@ -59,11 +55,13 @@ src/
 
 Mỗi game có thể là 2D (Canvas/DOM) hoặc 3D (Three.js), miễn tuân thủ lifecycle chung.
 
-### Thêm shape mới
+### Điều chỉnh Khảo Cổ Học
 
-1. Thêm metadata vào `src/games/shapes/shapeConfig.js`.
-2. Nếu cần geometry mới, thêm factory tương ứng trong `ShapesGame.createHoleGeometry()` và `createBlockGeometry()`.
-3. Thêm từ VI/EN vào `I18n.js`.
+- Catalog 16 vật thể nằm trong `src/games/archaeology/archaeologyCatalog.js`.
+- Model toy-style nằm trong `modelFactory.js`; cùng một builder được dùng cho vật thể bí mật và thumbnail 3D đáp án.
+- `ARCHAEOLOGY_CONFIG.minHits/maxHits` quyết định số lần đập đá, mặc định random từ 5 đến 7.
+- Mỗi ván luôn sinh đúng 3 đáp án: 1 đúng + 2 distractor random không trùng.
+- Trả lời đúng không tự chuyển ván; bé/phụ huynh bấm **New** để chơi tiếp.
 
 ### Điều chỉnh Space
 
@@ -76,8 +74,6 @@ Mỗi game có thể là 2D (Canvas/DOM) hoặc 3D (Three.js), miễn tuân th�
 
 - Nút 🗣️ trong HUD bật/tắt đọc và lưu vào `localStorage` với key `familygame-read`.
 - `SpeechManager` ưu tiên voice `vi-VN` khi đang ở tiếng Việt và `en-US` khi đang ở English.
-- Nếu thiết bị không có voice đúng locale, trình duyệt sẽ dùng voice cùng ngôn ngữ hoặc voice fallback của hệ điều hành.
-- Khi Info tắt, Space chỉ đọc tên. Khi Info bật, Space đọc tên + mô tả + các facts trong panel.
 - Mỗi lần chạm mới sẽ hủy nội dung đang đọc và ưu tiên nội dung mới nhất để bé không bị hàng đợi âm thanh dài.
 
 ## Chạy local
