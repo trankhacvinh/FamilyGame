@@ -1,0 +1,290 @@
+.fruit-catch-ui {
+  z-index: 4;
+}
+
+.fruit-weather-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  transition: background 900ms ease, filter 900ms ease;
+}
+
+.fruit-weather-badge {
+  position: absolute;
+  top: max(88px, calc(env(safe-area-inset-top) + 80px));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 5;
+  padding: 8px 14px;
+  border: 4px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  background: rgba(255, 250, 228, 0.93);
+  color: #34415f;
+  box-shadow: 0 6px 0 rgba(75, 91, 118, 0.18);
+  font-size: clamp(0.86rem, 2.4vw, 1.05rem);
+  font-weight: 950;
+  pointer-events: none;
+}
+
+.fruit-weather-sun,
+.fruit-weather-moon {
+  position: absolute;
+  right: 8%;
+  top: 12%;
+  width: clamp(64px, 10vw, 120px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 900ms ease, transform 900ms ease;
+}
+
+.fruit-weather-sun {
+  background: radial-gradient(circle at 38% 35%, #fff8b0 0 18%, #ffdf59 42%, #ffc83d 72%);
+  box-shadow: 0 0 38px rgba(255, 211, 75, 0.6);
+}
+
+.fruit-weather-moon {
+  background: #fff3bb;
+  box-shadow: 0 0 26px rgba(255, 244, 197, 0.5);
+}
+
+.fruit-weather-layer[data-weather='sunny'] .fruit-weather-sun,
+.fruit-weather-layer[data-weather='day'] .fruit-weather-sun {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fruit-weather-layer[data-weather='day'] .fruit-weather-sun {
+  opacity: 0.58;
+}
+
+.fruit-weather-layer[data-weather='night'] .fruit-weather-moon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fruit-weather-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.fruit-weather-layer[data-weather='night'] .fruit-weather-stars {
+  opacity: 0.95;
+}
+
+.fruit-weather-star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fffbe6;
+  box-shadow: 0 0 5px #fffbe6;
+  animation: fruitStarTwinkle 1.8s ease-in-out infinite alternate;
+}
+
+.fruit-weather-clouds {
+  position: absolute;
+  inset: 0;
+}
+
+.fruit-weather-cloud {
+  --scale: 1;
+  position: absolute;
+  width: 120px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 18px rgba(76, 93, 112, 0.12);
+  opacity: 0;
+  transform: translateX(-115vw) scale(var(--scale));
+  transition:
+    transform 2.7s cubic-bezier(0.22, 0.72, 0.24, 1) var(--delay, 0s),
+    opacity 1.1s ease var(--delay, 0s),
+    background 600ms ease;
+}
+
+.fruit-weather-cloud::before,
+.fruit-weather-cloud::after {
+  content: '';
+  position: absolute;
+  bottom: 15px;
+  border-radius: 50%;
+  background: inherit;
+}
+
+.fruit-weather-cloud::before {
+  left: 18px;
+  width: 54px;
+  height: 54px;
+}
+
+.fruit-weather-cloud::after {
+  right: 18px;
+  width: 68px;
+  height: 68px;
+}
+
+.fruit-weather-layer[data-weather='cloudy'] .fruit-weather-cloud,
+.fruit-weather-layer[data-weather='windy'] .fruit-weather-cloud,
+.fruit-weather-layer[data-weather='rain'] .fruit-weather-cloud,
+.fruit-weather-layer[data-weather='storm'] .fruit-weather-cloud,
+.fruit-weather-layer[data-weather='tornado'] .fruit-weather-cloud {
+  opacity: 0.9;
+  transform: translateX(0) scale(var(--scale));
+}
+
+.fruit-weather-layer[data-weather='cloudy'] .fruit-weather-cloud {
+  background: rgba(238, 244, 248, 0.98);
+}
+
+.fruit-weather-layer[data-weather='rain'] .fruit-weather-cloud {
+  background: rgba(199, 210, 221, 0.98);
+}
+
+.fruit-weather-layer[data-weather='storm'] .fruit-weather-cloud,
+.fruit-weather-layer[data-weather='tornado'] .fruit-weather-cloud {
+  background: rgba(130, 143, 158, 0.98);
+}
+
+.fruit-weather-layer[data-weather='windy'] .fruit-weather-cloud {
+  animation: fruitCloudWind 2.6s ease-in-out infinite alternate;
+}
+
+.fruit-weather-rain,
+.fruit-weather-wind,
+.fruit-weather-tornado,
+.fruit-weather-lightning {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.fruit-weather-layer[data-weather='rain'] .fruit-weather-rain,
+.fruit-weather-layer[data-weather='storm'] .fruit-weather-rain {
+  opacity: 0.8;
+}
+
+.fruit-weather-layer[data-weather='storm'] .fruit-weather-rain {
+  opacity: 1;
+}
+
+.fruit-weather-drop {
+  position: absolute;
+  top: -12vh;
+  width: 3px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(207, 235, 255, 0.85);
+  transform: rotate(10deg);
+  animation: fruitRainDrop 0.85s linear infinite;
+}
+
+.fruit-weather-layer[data-weather='windy'] .fruit-weather-wind,
+.fruit-weather-layer[data-weather='storm'] .fruit-weather-wind,
+.fruit-weather-layer[data-weather='tornado'] .fruit-weather-wind {
+  opacity: 0.82;
+}
+
+.fruit-weather-wind-line {
+  position: absolute;
+  left: -25vw;
+  width: 22vw;
+  min-width: 150px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  animation: fruitWindLine 1.9s linear infinite;
+}
+
+.fruit-weather-layer[data-weather='storm'] .fruit-weather-lightning {
+  opacity: 1;
+  animation: fruitLightning 4.6s steps(1, end) infinite;
+}
+
+.fruit-weather-tornado {
+  left: auto;
+  right: 5%;
+  top: 24%;
+  bottom: auto;
+  width: 180px;
+  height: 300px;
+  transform: rotate(-8deg);
+}
+
+.fruit-weather-layer[data-weather='tornado'] .fruit-weather-tornado {
+  opacity: 0.88;
+}
+
+.fruit-weather-tornado-ring {
+  position: absolute;
+  left: 50%;
+  border: 9px solid rgba(224, 231, 235, 0.74);
+  border-left-color: rgba(112, 128, 142, 0.82);
+  border-right-color: rgba(112, 128, 142, 0.34);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  animation: fruitTornadoSpin 0.65s linear infinite;
+}
+
+.fruit-weather-night-tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 24, 54, 0.36);
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.fruit-weather-layer[data-weather='night'] .fruit-weather-night-tint {
+  opacity: 1;
+}
+
+@keyframes fruitRainDrop {
+  from { transform: translateY(-5vh) rotate(10deg); }
+  to { transform: translateY(125vh) rotate(10deg); }
+}
+
+@keyframes fruitWindLine {
+  from { transform: translateX(0); opacity: 0; }
+  10% { opacity: 0.9; }
+  to { transform: translateX(150vw); opacity: 0; }
+}
+
+@keyframes fruitCloudWind {
+  from { margin-left: -2.5vw; }
+  to { margin-left: 3.5vw; }
+}
+
+@keyframes fruitTornadoSpin {
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+@keyframes fruitLightning {
+  0%, 91%, 94%, 100% { background: transparent; }
+  92% { background: rgba(255, 255, 232, 0.5); }
+  93% { background: rgba(255, 255, 255, 0.12); }
+}
+
+@keyframes fruitStarTwinkle {
+  from { opacity: 0.35; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.35); }
+}
+
+@media (max-width: 760px) {
+  .fruit-weather-badge {
+    top: max(186px, calc(env(safe-area-inset-top) + 178px));
+    right: 10px;
+    padding: 6px 11px;
+    border-width: 3px;
+  }
+
+  .fruit-weather-tornado {
+    right: -18px;
+    width: 135px;
+    height: 245px;
+  }
+}
