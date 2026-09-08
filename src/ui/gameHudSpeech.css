@@ -1,0 +1,35 @@
+.read-mini-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.read-mini-button--active {
+  background: #d7f7df;
+  color: #2f6643;
+}
+
+.read-mini-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+@media (max-width: 560px) {
+  .read-mini-button__label {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .hud-controls {
+    gap: 5px;
+  }
+
+  .hud-controls .language-mini-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 6px;
+  }
+}
