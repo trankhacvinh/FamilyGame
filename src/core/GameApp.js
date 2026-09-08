@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { AudioManager } from './AudioManager.js';
 import { I18n } from './I18n.js';
 import { ScreenManager } from './ScreenManager.js';
+import { SpeechManager } from './SpeechManager.js';
 import { SCREEN } from './constants.js';
 
 export class GameApp {
@@ -22,6 +23,7 @@ export class GameApp {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.audio = new AudioManager();
+    this.speech = new SpeechManager();
     this.i18n = new I18n();
     this.clock = new THREE.Clock();
     this.rafId = null;
@@ -37,6 +39,7 @@ export class GameApp {
       uiRoot: this.uiRoot,
       renderer: this.renderer,
       audio: this.audio,
+      speech: this.speech,
       i18n: this.i18n,
       viewport: this.viewport,
       goTo: (screenId) => this.screenManager.switchTo(screenId),
@@ -93,6 +96,7 @@ export class GameApp {
     cancelAnimationFrame(this.rafId);
     window.removeEventListener('resize', this.onResize);
     this.screenManager.dispose();
+    this.speech.dispose();
     this.audio.dispose();
     this.renderer.dispose();
   }
