@@ -1,3 +1,5 @@
+import './gameHudSpeech.css';
+
 export class GameHud {
   constructor(context, signal) {
     this.context = context;
@@ -42,7 +44,6 @@ export class GameHud {
     this.readButton.className = 'language-mini-button read-mini-button';
 
     this.readIcon = document.createElement('span');
-    this.readIcon.textContent = '🗣️';
     this.readIcon.setAttribute('aria-hidden', 'true');
 
     this.readLabel = document.createElement('span');
@@ -86,6 +87,7 @@ export class GameHud {
         : this.context.i18n.t('soundOff'),
     );
 
+    this.readIcon.textContent = this.context.speech.enabled ? '🗣️✓' : '🗣️';
     this.readLabel.textContent = this.context.i18n.t('read');
     this.readButton.disabled = !this.context.speech.available;
     this.readButton.classList.toggle('read-mini-button--active', this.context.speech.enabled);
