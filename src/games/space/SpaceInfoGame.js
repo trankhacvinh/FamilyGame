@@ -20,6 +20,7 @@ export class SpaceInfoGame extends SpaceSpeechGame {
 
   createUi() {
     super.createUi();
+    this.hud.root.classList.add('space-hud--with-info');
 
     this.infoButton = document.createElement('button');
     this.infoButton.type = 'button';
@@ -155,11 +156,12 @@ export class SpaceInfoGame extends SpaceSpeechGame {
     const info = getSpaceInfo(nameKey, this.context.i18n.language);
     if (!info) return this.context.i18n.t(nameKey);
 
+    const clean = (text) => String(text).replace(/[.!?]+\s*$/u, '');
     return [
       this.context.i18n.t(nameKey),
       info.summary,
       ...info.facts,
-    ].join('. ');
+    ].map(clean).join('. ') + '.';
   }
 
   renderInfoPanel(nameKey, { resetScroll = true } = {}) {
