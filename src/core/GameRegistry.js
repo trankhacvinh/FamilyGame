@@ -34,8 +34,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'curiosity',
     minAge: 3,
     type: '3D',
-    loader: () => import('../games/archaeology/ProgressiveArchaeologyGame.js'),
-    exportName: 'ProgressiveArchaeologyGame',
+    loader: () => import('../games/archaeology/ContinuousBreakArchaeologyGame.js'),
+    exportName: 'ContinuousBreakArchaeologyGame',
   },
 });
 
