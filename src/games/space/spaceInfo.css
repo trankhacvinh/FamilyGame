@@ -132,6 +132,13 @@
   }
 }
 
+@media (max-width: 480px) {
+  /* 4 nút bên phải sẽ xuống hàng để không đè nút Back trên điện thoại hẹp. */
+  .space-hud--with-info .hud-controls {
+    top: max(76px, calc(env(safe-area-inset-top) + 70px));
+  }
+}
+
 @media (max-height: 600px) and (orientation: landscape) {
   .space-info-panel {
     max-height: 38vh;
