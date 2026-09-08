@@ -46,8 +46,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'reflex',
     minAge: 3,
     type: '2.5D',
-    loader: () => import('../games/fruit-catch/FruitCatchGame.js'),
-    exportName: 'FruitCatchGame',
+    loader: () => import('../games/fruit-catch/FruitCatchVisualGame.js'),
+    exportName: 'FruitCatchVisualGame',
   },
 });
 
