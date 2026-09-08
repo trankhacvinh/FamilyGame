@@ -152,16 +152,19 @@ export class SpaceInfoGame extends SpaceSpeechGame {
     return this.buildNarration(nameKey);
   }
 
+  /**
+   * Trả về từng phần riêng thay vì ghép thành một utterance dài.
+   * SpeechManager sẽ đọc tuần tự từng câu để tiếng Việt tự nhiên hơn.
+   */
   buildNarration(nameKey) {
     const info = getSpaceInfo(nameKey, this.context.i18n.language);
-    if (!info) return this.context.i18n.t(nameKey);
+    if (!info) return [this.context.i18n.t(nameKey)];
 
-    const clean = (text) => String(text).replace(/[.!?]+\s*$/u, '');
     return [
       this.context.i18n.t(nameKey),
       info.summary,
       ...info.facts,
-    ].map(clean).join('. ') + '.';
+    ];
   }
 
   renderInfoPanel(nameKey, { resetScroll = true } = {}) {
