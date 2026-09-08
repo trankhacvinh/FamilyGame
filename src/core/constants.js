@@ -3,6 +3,7 @@ export const SCREEN = Object.freeze({
   SHAPES: 'GAME_SHAPES',
   SPACE: 'GAME_SPACE',
   ARCHAEOLOGY: 'GAME_ARCHAEOLOGY',
+  FRUIT_CATCH: 'GAME_FRUIT_CATCH',
 });
 
 export const LANGUAGE = Object.freeze({
