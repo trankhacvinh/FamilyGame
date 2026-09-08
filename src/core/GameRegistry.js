@@ -22,8 +22,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'science',
     minAge: 3,
     type: '3D',
-    loader: () => import('../games/space/SpaceSpeechGame.js'),
-    exportName: 'SpaceSpeechGame',
+    loader: () => import('../games/space/SpaceInfoGame.js'),
+    exportName: 'SpaceInfoGame',
   },
 });
 
