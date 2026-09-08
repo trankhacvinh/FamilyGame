@@ -1,1 +1,0 @@
-Archaeology game implementation marker. This file can be removed after CI verification.
