@@ -37,6 +37,18 @@ export const GAME_REGISTRY = Object.freeze({
     loader: () => import('../games/archaeology/ContinuousBreakArchaeologyGame.js'),
     exportName: 'ContinuousBreakArchaeologyGame',
   },
+  [SCREEN.FRUIT_CATCH]: {
+    id: SCREEN.FRUIT_CATCH,
+    titleKey: 'fruitCatchTitle',
+    descriptionKey: 'fruitCatchDescription',
+    icon: '🍎',
+    accent: '#70cf9e',
+    category: 'reflex',
+    minAge: 3,
+    type: '2.5D',
+    loader: () => import('../games/fruit-catch/FruitCatchGame.js'),
+    exportName: 'FruitCatchGame',
+  },
 });
 
 export function getGameDefinition(screenId) {
