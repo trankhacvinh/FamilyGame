@@ -10,8 +10,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'logic',
     minAge: 3,
     type: '3D',
-    loader: () => import('../games/shapes/ShapesGame.js'),
-    exportName: 'ShapesGame',
+    loader: () => import('../games/shapes/ShapesSpeechGame.js'),
+    exportName: 'ShapesSpeechGame',
   },
   [SCREEN.SPACE]: {
     id: SCREEN.SPACE,
@@ -22,8 +22,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'science',
     minAge: 3,
     type: '3D',
-    loader: () => import('../games/space/SpaceGame.js'),
-    exportName: 'SpaceGame',
+    loader: () => import('../games/space/SpaceSpeechGame.js'),
+    exportName: 'SpaceSpeechGame',
   },
 });
 
