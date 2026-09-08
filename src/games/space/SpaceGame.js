@@ -1,7 +1,15 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { BaseGame } from '../../core/BaseGame.js';
 import { GameHud } from '../../ui/GameHud.js';
-import { PLANET_CATALOG, SPACE_VISITOR_CONFIG } from './spaceConfig.js';
+import {
+  PLANET_CATALOG,
+  SPACE_CAMERA_CONFIG,
+  SPACE_VISITOR_CONFIG,
+} from './spaceConfig.js';
+
+const X_AXIS = new THREE.Vector3(1, 0, 0);
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
 export class SpaceGame extends BaseGame {
   constructor(context) {
@@ -16,6 +24,13 @@ export class SpaceGame extends BaseGame {
     this.unsubscribeLanguage = null;
     this.visitorSpawnTimer = 0;
     this.projectPoint = new THREE.Vector3();
+
+    this.controls = null;
+    this.controlsStartedHandler = null;
+    this.cameraUserInteracted = false;
+
+    this.activePointers = new Set();
+    this.tapState = null;
   }
 
   async init() {
@@ -23,16 +38,17 @@ export class SpaceGame extends BaseGame {
     this.scene.background = new THREE.Color(0x071a3b);
 
     const aspect = this.context.viewport.width / this.context.viewport.height;
-    this.camera = new THREE.PerspectiveCamera(48, aspect, 0.1, 120);
-    this.camera.position.set(0, 12, 22);
-    this.camera.lookAt(0, 0, 0);
+    this.camera = new THREE.PerspectiveCamera(48, aspect, 0.1, 200);
+    this.setInitialCamera(this.context.viewport.width, this.context.viewport.height);
 
     this.createLights();
     this.createStars();
     this.createSun();
     this.createPlanets();
+    this.createControls();
     this.createUi();
     this.bindInput();
+
     this.visitorSpawnTimer = THREE.MathUtils.randFloat(
       SPACE_VISITOR_CONFIG.firstDelay[0],
       SPACE_VISITOR_CONFIG.firstDelay[1],
@@ -43,17 +59,17 @@ export class SpaceGame extends BaseGame {
     const ambient = this.track(new THREE.AmbientLight(0x91aaff, 0.82));
     this.scene.add(ambient);
 
-    this.sunLight = this.track(new THREE.PointLight(0xffd36b, 135, 40, 1.6));
+    this.sunLight = this.track(new THREE.PointLight(0xffd36b, 160, 58, 1.5));
     this.sunLight.position.set(0, 0, 0);
     this.scene.add(this.sunLight);
   }
 
   createStars() {
-    const count = 700;
+    const count = 900;
     const positions = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i += 1) {
-      const radius = THREE.MathUtils.randFloat(14, 48);
+      const radius = THREE.MathUtils.randFloat(24, 82);
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
 
@@ -67,7 +83,7 @@ export class SpaceGame extends BaseGame {
 
     const material = new THREE.PointsMaterial({
       color: 0xd9e7ff,
-      size: 0.09,
+      size: 0.1,
       transparent: true,
       opacity: 0.9,
       sizeAttenuation: true,
@@ -79,7 +95,7 @@ export class SpaceGame extends BaseGame {
 
   createSun() {
     this.sun = this.trackObject(new THREE.Mesh(
-      new THREE.SphereGeometry(1.28, 48, 32),
+      new THREE.SphereGeometry(1.38, 48, 32),
       new THREE.MeshStandardMaterial({
         color: 0xffb22e,
         emissive: 0xff6b18,
@@ -95,12 +111,14 @@ export class SpaceGame extends BaseGame {
 
   createPlanets() {
     PLANET_CATALOG.forEach((definition) => {
-      this.createOrbit(definition.orbitRadius);
+      this.createOrbit(definition);
 
       const group = new THREE.Group();
       group.userData = {
         ...definition,
         interactionTime: 0,
+        inclinationRad: THREE.MathUtils.degToRad(definition.inclination ?? 0),
+        ascendingNodeRad: THREE.MathUtils.degToRad(definition.ascendingNode ?? 0),
       };
 
       const sphere = new THREE.Mesh(
@@ -164,12 +182,13 @@ export class SpaceGame extends BaseGame {
 
       // Hit target trong suốt giúp bé chạm hành tinh nhỏ dễ hơn trên điện thoại.
       const hitTarget = new THREE.Mesh(
-        new THREE.SphereGeometry(Math.max(definition.radius * 1.65, 0.5), 16, 12),
+        new THREE.SphereGeometry(Math.max(definition.radius * 1.65, 0.55), 16, 12),
         new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
       );
       this.markInteractive(hitTarget, group);
       group.add(hitTarget);
 
+      this.updatePlanetOrbitPosition(group);
       this.trackObject(group);
       this.planets.push(group);
       this.scene.add(group);
@@ -180,15 +199,22 @@ export class SpaceGame extends BaseGame {
     object.userData.interactiveRoot = root;
   }
 
-  createOrbit(radius) {
+  createOrbit(definition) {
+    const inclination = THREE.MathUtils.degToRad(definition.inclination ?? 0);
+    const ascendingNode = THREE.MathUtils.degToRad(definition.ascendingNode ?? 0);
     const points = [];
-    for (let i = 0; i <= 112; i += 1) {
-      const angle = (i / 112) * Math.PI * 2;
-      points.push(new THREE.Vector3(
-        Math.cos(angle) * radius,
+
+    for (let i = 0; i <= 144; i += 1) {
+      const angle = (i / 144) * Math.PI * 2;
+      const point = new THREE.Vector3(
+        Math.cos(angle) * definition.orbitRadius,
         0,
-        Math.sin(angle) * radius,
-      ));
+        Math.sin(angle) * definition.orbitRadius,
+      );
+
+      point.applyAxisAngle(X_AXIS, inclination);
+      point.applyAxisAngle(Y_AXIS, ascendingNode);
+      points.push(point);
     }
 
     const orbit = this.trackObject(new THREE.LineLoop(
@@ -196,10 +222,38 @@ export class SpaceGame extends BaseGame {
       new THREE.LineBasicMaterial({
         color: 0x5171a8,
         transparent: true,
-        opacity: 0.28,
+        opacity: 0.3,
       }),
     ));
+
     this.scene.add(orbit);
+  }
+
+  createControls() {
+    this.controls = new OrbitControls(this.camera, this.context.canvas);
+    this.controls.target.set(0, 0, 0);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.065;
+    this.controls.enablePan = false;
+    this.controls.enableZoom = true;
+    this.controls.enableRotate = true;
+    this.controls.rotateSpeed = 0.7;
+    this.controls.zoomSpeed = 0.9;
+    this.controls.minDistance = SPACE_CAMERA_CONFIG.minDistance;
+    this.controls.maxDistance = SPACE_CAMERA_CONFIG.maxDistance;
+    this.controls.minPolarAngle = 0.12;
+    this.controls.maxPolarAngle = Math.PI - 0.12;
+    this.controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+    this.controls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
+    this.controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
+    this.controls.touches.ONE = THREE.TOUCH.ROTATE;
+    this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+
+    this.controlsStartedHandler = () => {
+      this.cameraUserInteracted = true;
+    };
+    this.controls.addEventListener('start', this.controlsStartedHandler);
+    this.controls.update();
   }
 
   createUi() {
@@ -218,19 +272,81 @@ export class SpaceGame extends BaseGame {
     });
   }
 
+  /**
+   * OrbitControls dùng cùng canvas với Raycaster.
+   * Chỉ coi thao tác là "tap" khi pointer gần như không di chuyển.
+   * Nhờ vậy kéo để xoay camera sẽ không vô tình kích hoạt hành tinh.
+   */
   bindInput() {
-    this.context.canvas.addEventListener('pointerdown', (event) => {
-      const rect = this.context.canvas.getBoundingClientRect();
-      this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    const canvas = this.context.canvas;
+    const tapMoveThreshold = 10;
+    const maxTapDuration = 600;
 
-      this.raycaster.setFromCamera(this.pointer, this.camera);
-      const hit = this.raycaster.intersectObjects(this.getClickableMeshes(), false)[0];
-      if (!hit) return;
+    canvas.addEventListener('pointerdown', (event) => {
+      this.activePointers.add(event.pointerId);
 
-      const root = hit.object.userData.interactiveRoot;
-      if (root) this.greetObject(root);
+      if (this.activePointers.size === 1) {
+        this.tapState = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          startedAt: performance.now(),
+          moved: false,
+          multiTouch: false,
+        };
+      } else if (this.tapState) {
+        this.tapState.multiTouch = true;
+      }
     }, { signal: this.signal });
+
+    canvas.addEventListener('pointermove', (event) => {
+      if (!this.tapState || event.pointerId !== this.tapState.pointerId) return;
+      const distance = Math.hypot(
+        event.clientX - this.tapState.x,
+        event.clientY - this.tapState.y,
+      );
+      if (distance > tapMoveThreshold) this.tapState.moved = true;
+    }, { signal: this.signal });
+
+    const finishPointer = (event, allowTap) => {
+      const state = this.tapState;
+      const pointerCountBeforeRelease = this.activePointers.size;
+      this.activePointers.delete(event.pointerId);
+
+      if (
+        allowTap
+        && state
+        && event.pointerId === state.pointerId
+        && !state.moved
+        && !state.multiTouch
+        && pointerCountBeforeRelease === 1
+        && performance.now() - state.startedAt <= maxTapDuration
+      ) {
+        this.handleTap(event);
+      }
+
+      if (state?.pointerId === event.pointerId) this.tapState = null;
+    };
+
+    canvas.addEventListener('pointerup', (event) => finishPointer(event, true), {
+      signal: this.signal,
+    });
+    canvas.addEventListener('pointercancel', (event) => finishPointer(event, false), {
+      signal: this.signal,
+    });
+  }
+
+  handleTap(event) {
+    const rect = this.context.canvas.getBoundingClientRect();
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const hit = this.raycaster.intersectObjects(this.getClickableMeshes(), false)[0];
+    if (!hit) return;
+
+    const root = hit.object.userData.interactiveRoot;
+    if (root) this.greetObject(root);
   }
 
   getClickableMeshes() {
@@ -253,6 +369,7 @@ export class SpaceGame extends BaseGame {
   }
 
   update(delta, elapsed) {
+    this.controls?.update();
     this.updateSun(delta);
     this.stars.rotation.y += delta * 0.006;
     this.updatePlanets(delta);
@@ -286,11 +403,7 @@ export class SpaceGame extends BaseGame {
     this.planets.forEach((planet) => {
       const data = planet.userData;
       data.angle += data.orbitSpeed * delta;
-
-      // Quỹ đạo tròn tính trực tiếp bằng sin/cos, không dùng physics engine.
-      planet.position.x = Math.cos(data.angle) * data.orbitRadius;
-      planet.position.z = Math.sin(data.angle) * data.orbitRadius;
-      planet.position.y = Math.sin(data.angle * 1.7) * 0.1;
+      this.updatePlanetOrbitPosition(planet);
 
       planet.rotation.y += delta * (data.interactionTime > 0 ? 14 : 0.72);
 
@@ -302,6 +415,17 @@ export class SpaceGame extends BaseGame {
         this.lerpScaleToOne(planet, delta);
       }
     });
+  }
+
+  updatePlanetOrbitPosition(planet) {
+    const data = planet.userData;
+    planet.position.set(
+      Math.cos(data.angle) * data.orbitRadius,
+      0,
+      Math.sin(data.angle) * data.orbitRadius,
+    );
+    planet.position.applyAxisAngle(X_AXIS, data.inclinationRad);
+    planet.position.applyAxisAngle(Y_AXIS, data.ascendingNodeRad);
   }
 
   applyGreetingScale(object, remainingTime) {
@@ -322,6 +446,7 @@ export class SpaceGame extends BaseGame {
 
   updateVisitors(delta) {
     this.visitorSpawnTimer -= delta;
+
     if (this.visitorSpawnTimer <= 0 && this.visitors.length < SPACE_VISITOR_CONFIG.maxVisitors) {
       this.spawnVisitor();
       this.visitorSpawnTimer = THREE.MathUtils.randFloat(
@@ -349,7 +474,7 @@ export class SpaceGame extends BaseGame {
         this.lerpScaleToOne(visitor, delta);
       }
 
-      if (data.life <= 0 || visitor.position.length() > 30) {
+      if (data.life <= 0 || visitor.position.length() > 44) {
         if (this.popupTarget === visitor) {
           this.popup.hidden = true;
           this.popupTarget = null;
@@ -364,14 +489,14 @@ export class SpaceGame extends BaseGame {
     const isComet = Math.random() < 0.5;
     const direction = Math.random() < 0.5 ? 1 : -1;
     const start = new THREE.Vector3(
-      direction > 0 ? -12.5 : 12.5,
-      THREE.MathUtils.randFloat(0.2, 3.3),
-      THREE.MathUtils.randFloat(-7.5, 7.5),
+      direction > 0 ? -20 : 20,
+      THREE.MathUtils.randFloat(-2.5, 5.5),
+      THREE.MathUtils.randFloat(-12, 12),
     );
     const target = new THREE.Vector3(
       -start.x,
-      THREE.MathUtils.randFloat(-0.3, 2.7),
-      THREE.MathUtils.randFloat(-7.5, 7.5),
+      THREE.MathUtils.randFloat(-3.5, 5),
+      THREE.MathUtils.randFloat(-12, 12),
     );
     const speed = THREE.MathUtils.randFloat(
       SPACE_VISITOR_CONFIG.minSpeed,
@@ -386,7 +511,7 @@ export class SpaceGame extends BaseGame {
     visitor.position.copy(start);
     visitor.userData.nameKey = isComet ? 'comet' : 'asteroid';
     visitor.userData.velocity = velocity;
-    visitor.userData.life = start.distanceTo(target) / speed + 2.5;
+    visitor.userData.life = start.distanceTo(target) / speed + 3.5;
     visitor.userData.interactionTime = 0;
     visitor.userData.spin = new THREE.Vector3(
       THREE.MathUtils.randFloat(0.6, 1.5),
@@ -422,7 +547,11 @@ export class SpaceGame extends BaseGame {
     ];
     const tail = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(tailPoints),
-      new THREE.LineBasicMaterial({ color: 0xbfe9ff, transparent: true, opacity: 0.72 }),
+      new THREE.LineBasicMaterial({
+        color: 0xbfe9ff,
+        transparent: true,
+        opacity: 0.72,
+      }),
     );
     group.add(tail);
 
@@ -460,6 +589,7 @@ export class SpaceGame extends BaseGame {
     object.traverse((child) => {
       child.geometry?.dispose?.();
       const materials = Array.isArray(child.material) ? child.material : [child.material];
+
       materials.filter(Boolean).forEach((material) => {
         Object.values(material).forEach((value) => value?.isTexture && value.dispose());
         material.dispose?.();
@@ -477,24 +607,40 @@ export class SpaceGame extends BaseGame {
     this.popup.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
   }
 
-  resize(width, height) {
-    if (!this.camera) return;
+  setInitialCamera(width, height) {
     const aspect = width / height;
-    this.camera.aspect = aspect;
 
     if (aspect < 0.75) {
-      this.camera.position.set(0, 30, 42);
-      this.camera.fov = 54;
-    } else if (aspect < 1.1) {
-      this.camera.position.set(0, 22, 34);
+      this.camera.position.set(0, 32, 52);
       this.camera.fov = 52;
+    } else if (aspect < 1.1) {
+      this.camera.position.set(0, 25, 42);
+      this.camera.fov = 50;
     } else {
-      this.camera.position.set(0, 13.5, 24);
-      this.camera.fov = 49;
+      this.camera.position.set(0, 18, 32);
+      this.camera.fov = 48;
     }
 
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
+  }
+
+  resize(width, height) {
+    if (!this.camera) return;
+
+    this.camera.aspect = width / height;
+
+    // Chỉ tự căn camera trước khi người chơi xoay/zoom.
+    // Sau tương tác đầu tiên, resize không được giật camera về góc mặc định.
+    if (!this.cameraUserInteracted) {
+      this.setInitialCamera(width, height);
+      if (this.controls) {
+        this.controls.target.set(0, 0, 0);
+        this.controls.update();
+      }
+    } else {
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   dispose() {
@@ -502,9 +648,20 @@ export class SpaceGame extends BaseGame {
     this.hud?.dispose();
     this.popup?.remove();
 
+    if (this.controls) {
+      if (this.controlsStartedHandler) {
+        this.controls.removeEventListener('start', this.controlsStartedHandler);
+      }
+      this.controls.dispose();
+      this.controls = null;
+    }
+
     for (let index = this.visitors.length - 1; index >= 0; index -= 1) {
       this.removeVisitor(index);
     }
+
+    this.activePointers.clear();
+    this.tapState = null;
 
     super.dispose();
     this.planets.length = 0;
