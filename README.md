@@ -7,6 +7,7 @@ Bộ trò chơi học tập nhẹ, vui nhộn cho trẻ nhỏ, hỗ trợ **Ti�
 - 🔺 **Thả Khối Vào Lỗ**: game 3D kéo thả bằng Raycaster, cấu hình được **3 / 4 / 5 / 6 khối**. Hiện có Circle, Square, Triangle, Rectangle, Star và Hexagon; mỗi khối có tên VI/EN.
 - 🪐 **Khám Phá Hệ Mặt Trời**: đủ 8 hành tinh (Sao Thủy → Sao Hải Vương), Mặt Trời, quỹ đạo sin/cos và các visitor ngẫu nhiên như Sao Chổi / Thiên Thạch để bé chạm khám phá.
 - 🔊 Âm thanh Web Audio nhẹ; có thể thay bằng file audio thật qua `AudioManager.registerSample()`.
+- 🗣️ **Read / Đọc**: tùy chọn đọc tên shape, hành tinh, Mặt Trời, Sao Chổi và Thiên Thạch theo ngôn ngữ VI/EN hiện tại bằng Web Speech API. Trạng thái được nhớ giữa các lần chơi.
 - 🌐 Chuyển ngôn ngữ VI / EN.
 - 📱 Responsive portrait / landscape, hỗ trợ Pointer Events cho mouse / touch / stylus.
 - ♻️ Cleanup geometry, material, texture, listeners và timer khi đổi màn hình; visitor động trong Space được dispose ngay khi bay khỏi scene.
@@ -23,20 +24,24 @@ src/
 │   ├── BaseGame.js         # lifecycle chung cho game
 │   ├── ResourceTracker.js  # dispose tài nguyên Three.js
 │   ├── AudioManager.js
+│   ├── SpeechManager.js    # đọc tên VI/EN bằng Web Speech API
 │   ├── I18n.js
 │   └── constants.js
 ├── games/
 │   ├── shapes/
 │   │   ├── ShapesGame.js
+│   │   ├── ShapesSpeechGame.js
 │   │   ├── shapeConfig.js  # catalog shape + cấu hình số lượng 3–6
 │   │   └── shapes.css
 │   └── space/
 │       ├── SpaceGame.js
+│       ├── SpaceSpeechGame.js
 │       └── spaceConfig.js  # catalog 8 hành tinh + visitor config
 ├── screens/
 │   └── MenuScreen.js
 ├── ui/
-│   └── GameHud.js
+│   ├── GameHud.js
+│   └── gameHudSpeech.css
 ├── main.js
 └── styles.css
 ```
@@ -60,6 +65,13 @@ Mỗi game có thể là 2D (Canvas/DOM) hoặc 3D (Three.js), miễn tuân th�
 
 - Chỉnh bán kính, màu, tốc độ/quỹ đạo hành tinh trong `src/games/space/spaceConfig.js`.
 - Chỉnh tần suất xuất hiện Sao Chổi / Thiên Thạch bằng `SPACE_VISITOR_CONFIG`.
+
+### Read / Đọc
+
+- Nút 🗣️ trong HUD bật/tắt đọc tên và lưu vào `localStorage` với key `familygame-read`.
+- `SpeechManager` ưu tiên voice `vi-VN` khi đang ở tiếng Việt và `en-US` khi đang ở English.
+- Nếu thiết bị không có voice đúng locale, trình duyệt sẽ dùng voice cùng ngôn ngữ hoặc voice fallback của hệ điều hành.
+- Mỗi lần chạm mới sẽ hủy từ đang đọc và ưu tiên đọc từ mới nhất để bé không bị hàng đợi âm thanh dài.
 
 ## Chạy local
 
