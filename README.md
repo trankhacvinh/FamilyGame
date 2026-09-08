@@ -4,12 +4,12 @@ Bộ trò chơi học tập nhẹ, vui nhộn cho trẻ nhỏ, hỗ trợ **Ti�
 
 ## V1 có gì?
 
-- 🔺 **Thả Khối Vào Lỗ**: game 3D kéo thả hình cầu / hộp / tam giác bằng Raycaster.
-- 🪐 **Khám Phá Hệ Mặt Trời**: Mặt Trời, Trái Đất, Sao Hỏa, Sao Thổ chuyển động theo quỹ đạo.
+- 🔺 **Thả Khối Vào Lỗ**: game 3D kéo thả bằng Raycaster, cấu hình được **3 / 4 / 5 / 6 khối**. Hiện có Circle, Square, Triangle, Rectangle, Star và Hexagon; mỗi khối có tên VI/EN.
+- 🪐 **Khám Phá Hệ Mặt Trời**: đủ 8 hành tinh (Sao Thủy → Sao Hải Vương), Mặt Trời, quỹ đạo sin/cos và các visitor ngẫu nhiên như Sao Chổi / Thiên Thạch để bé chạm khám phá.
 - 🔊 Âm thanh Web Audio nhẹ; có thể thay bằng file audio thật qua `AudioManager.registerSample()`.
 - 🌐 Chuyển ngôn ngữ VI / EN.
 - 📱 Responsive portrait / landscape, hỗ trợ Pointer Events cho mouse / touch / stylus.
-- ♻️ Cleanup geometry, material, texture, listeners và timer khi đổi màn hình.
+- ♻️ Cleanup geometry, material, texture, listeners và timer khi đổi màn hình; visitor động trong Space được dispose ngay khi bay khỏi scene.
 - ⚡ Lazy-load từng game bằng dynamic `import()`.
 
 ## Kiến trúc
@@ -27,7 +27,12 @@ src/
 │   └── constants.js
 ├── games/
 │   ├── shapes/
+│   │   ├── ShapesGame.js
+│   │   ├── shapeConfig.js  # catalog shape + cấu hình số lượng 3–6
+│   │   └── shapes.css
 │   └── space/
+│       ├── SpaceGame.js
+│       └── spaceConfig.js  # catalog 8 hành tinh + visitor config
 ├── screens/
 │   └── MenuScreen.js
 ├── ui/
@@ -44,6 +49,17 @@ src/
 4. Menu sẽ tự sinh card game mới từ registry.
 
 Mỗi game có thể là 2D (Canvas/DOM) hoặc 3D (Three.js), miễn tuân thủ lifecycle chung.
+
+### Thêm shape mới
+
+1. Thêm metadata vào `src/games/shapes/shapeConfig.js`.
+2. Nếu cần geometry mới, thêm factory tương ứng trong `ShapesGame.createHoleGeometry()` và `createBlockGeometry()`.
+3. Thêm từ VI/EN vào `I18n.js`.
+
+### Điều chỉnh Space
+
+- Chỉnh bán kính, màu, tốc độ/quỹ đạo hành tinh trong `src/games/space/spaceConfig.js`.
+- Chỉnh tần suất xuất hiện Sao Chổi / Thiên Thạch bằng `SPACE_VISITOR_CONFIG`.
 
 ## Chạy local
 
