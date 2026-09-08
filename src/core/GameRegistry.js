@@ -25,6 +25,18 @@ export const GAME_REGISTRY = Object.freeze({
     loader: () => import('../games/space/SpaceInfoGame.js'),
     exportName: 'SpaceInfoGame',
   },
+  [SCREEN.ARCHAEOLOGY]: {
+    id: SCREEN.ARCHAEOLOGY,
+    titleKey: 'archaeologyTitle',
+    descriptionKey: 'archaeologyDescription',
+    icon: '🪨',
+    accent: '#d89c62',
+    category: 'curiosity',
+    minAge: 3,
+    type: '3D',
+    loader: () => import('../games/archaeology/ArchaeologyGame.js'),
+    exportName: 'ArchaeologyGame',
+  },
 });
 
 export function getGameDefinition(screenId) {
