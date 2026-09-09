@@ -165,10 +165,10 @@ export class HiddenObjectsGame extends BaseGame {
       this.addBox([1.4, 0.12, 0.72], this.material.shelf, [3.35, y, 0]);
     });
 
-    // Toy chest and rug.
+    // Toy chest and rug. Keep the rug shallow in Z so it never covers a toy visually.
     this.addBox([1.55, 0.82, 1.05], this.material.chest, [3.28, -1.72, -0.08]);
     this.addBox([1.62, 0.16, 1.12], this.material.woodDark, [3.28, -1.24, -0.02], [0, 0, -0.05]);
-    this.addBox([4.15, 0.08, 1.55], this.material.rug, [-0.55, -2.22, 0.28]);
+    this.addBox([4.15, 0.08, 0.12], this.material.rug, [-0.55, -2.22, 0.28]);
 
     // Small decorative picture and plant, not clickable.
     this.addBox([1.05, 0.82, 0.08], this.material.trim, [0.52, 2.05, -0.85]);
@@ -473,6 +473,7 @@ export class HiddenObjectsGame extends BaseGame {
 
     this.ui.completeTitle.textContent = this.context.i18n.t('hiddenCompleteTitle');
     this.ui.completeButton.textContent = this.context.i18n.t('hiddenNewGame');
+    this.ui.root.classList.toggle('hidden-objects-ui--complete', this.completed);
   }
 
   update(delta) {
