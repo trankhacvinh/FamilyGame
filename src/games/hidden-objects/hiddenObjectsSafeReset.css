@@ -1,0 +1,29 @@
+.hidden-prompt .hidden-reset--safe {
+  position: static;
+  right: auto;
+  bottom: auto;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-width: 0;
+  border-radius: 50%;
+  box-shadow: 0 4px 0 #55499a;
+  font-size: 1.05rem;
+}
+
+.hidden-prompt .hidden-reset--safe:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #55499a;
+}
+
+.hidden-objects-ui--complete .hidden-prompt .hidden-reset--safe {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 680px) {
+  .hidden-prompt .hidden-reset--safe {
+    width: 40px;
+    height: 40px;
+  }
+}
