@@ -49,6 +49,18 @@ export const GAME_REGISTRY = Object.freeze({
     loader: () => import('../games/fruit-catch/FruitCatchWeatherGame.js'),
     exportName: 'FruitCatchWeatherGame',
   },
+  [SCREEN.CLAW]: {
+    id: SCREEN.CLAW,
+    titleKey: 'clawTitle',
+    descriptionKey: 'clawDescription',
+    icon: '🧸',
+    accent: '#ee78a8',
+    category: 'coordination',
+    minAge: 3,
+    type: '3D',
+    loader: () => import('../games/claw/ClawMachineGame.js'),
+    exportName: 'ClawMachineGame',
+  },
 });
 
 export function getGameDefinition(screenId) {
