@@ -1,0 +1,65 @@
+/*
+ * Compatibility rules dùng chung cho iPhone/iPad và các thiết bị cảm ứng.
+ * Không đặt touch-action:none lên toàn UI vì Space cần pinch/drag và info panel cần scroll.
+ */
+html,
+body,
+#app {
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@supports (height: 100dvh) {
+  html,
+  body,
+  #app {
+    height: 100dvh;
+  }
+}
+
+body {
+  touch-action: manipulation;
+}
+
+#game-canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+@media (pointer: coarse) {
+  button,
+  [role="button"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+.menu-screen {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
+}
+
+.game-hud,
+.fruit-catch-ui,
+.archaeology-ui {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Những vùng nội dung dài vẫn được phép cuộn bằng một ngón. */
+.space-info-panel,
+.space-info-panel__content,
+[data-scrollable="true"] {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
