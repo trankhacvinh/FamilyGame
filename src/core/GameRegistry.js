@@ -73,6 +73,18 @@ export const GAME_REGISTRY = Object.freeze({
     loader: () => import('../games/crocodile-brush/CrocodileBrushGame.js'),
     exportName: 'CrocodileBrushGame',
   },
+  [SCREEN.HIDDEN_OBJECTS]: {
+    id: SCREEN.HIDDEN_OBJECTS,
+    titleKey: 'hiddenTitle',
+    descriptionKey: 'hiddenDescription',
+    icon: '🔎',
+    accent: '#7fb6ff',
+    category: 'observation',
+    minAge: 3,
+    type: '2.5D',
+    loader: () => import('../games/hidden-objects/HiddenObjectsGame.js'),
+    exportName: 'HiddenObjectsGame',
+  },
 });
 
 export function getGameDefinition(screenId) {
