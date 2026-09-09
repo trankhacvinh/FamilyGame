@@ -1,9 +1,6 @@
 /**
  * SpeechManager dùng Web Speech API có sẵn trong trình duyệt để đọc tên/nội dung.
  * Trạng thái Read độc lập với âm thanh hiệu ứng và được lưu bằng localStorage.
- *
- * iOS/iPadOS đôi khi làm speechSynthesis mất voice cache hoặc treo sequence sau khi app
- * bị background. Vì vậy khi quay lại foreground manager sẽ cancel sequence cũ và refresh voice.
  */
 export class SpeechManager {
   constructor() {
@@ -13,7 +10,6 @@ export class SpeechManager {
     this.voices = [];
     this.sequenceId = 0;
     this.pauseTimer = null;
-    this.voiceRefreshTimer = null;
     this.currentUtterance = null;
     this.onVoicesChanged = this.refreshVoices.bind(this);
 
@@ -37,41 +33,6 @@ export class SpeechManager {
 
   toggle() {
     return this.setEnabled(!this.enabled);
-  }
-
-  unlockFromUserGesture() {
-    if (!this.available) return;
-    this.refreshVoices();
-    // Safari có thể để speech synthesis ở paused state sau background/interruption.
-    try {
-      if (this.synth.paused) this.synth.resume();
-    } catch {
-      // Không có gì cần làm; speak() tiếp theo vẫn sẽ thử lại.
-    }
-  }
-
-  handleBackground() {
-    if (!this.available) return;
-    // Không để một câu cũ phát tiếp đột ngột khi người dùng quay lại app.
-    this.cancel();
-  }
-
-  handleForeground() {
-    if (!this.available) return;
-
-    this.cancel();
-    this.refreshVoices();
-
-    // iOS đôi khi repopulate voice list sau pageshow/visibilitychange một nhịp.
-    window.clearTimeout(this.voiceRefreshTimer);
-    this.voiceRefreshTimer = window.setTimeout(() => {
-      this.refreshVoices();
-      try {
-        if (this.synth.paused) this.synth.resume();
-      } catch {
-        // Bỏ qua nếu browser không cho resume khi chưa có user gesture.
-      }
-    }, 180);
   }
 
   /**
@@ -143,7 +104,7 @@ export class SpeechManager {
    * Mỗi lần bé chạm mới sẽ hủy sequence cũ và ưu tiên nội dung mới nhất.
    */
   speak(content, language) {
-    if (!this.enabled || !this.available || !content || document.hidden) return false;
+    if (!this.enabled || !this.available || !content) return false;
 
     const parts = this.normalizeSpeechParts(content);
     if (parts.length === 0) return false;
@@ -152,16 +113,17 @@ export class SpeechManager {
     const sequenceId = this.sequenceId;
 
     const start = () => {
-      if (!this.enabled || sequenceId !== this.sequenceId || document.hidden) return;
+      if (!this.enabled || sequenceId !== this.sequenceId) return;
       const voice = this.resolveVoice(language);
       const isNarration = parts.length > 1 || parts[0].length > 70;
       this.speakPart(parts, 0, language, voice, isNarration, sequenceId);
     };
 
-    // Mobile Safari/Chrome đôi lúc trả [] ngay sau reload/pageshow rồi cập nhật sau đó.
+    // Chrome/Android đôi lúc trả [] ngay sau reload rồi phát `voiceschanged` sau đó.
+    // Chờ rất ngắn một lần để tăng khả năng lấy đúng voice vi-VN/en-US.
     this.refreshVoices();
     if (this.voices.length === 0) {
-      this.pauseTimer = window.setTimeout(start, 160);
+      this.pauseTimer = window.setTimeout(start, 140);
     } else {
       start();
     }
@@ -172,7 +134,6 @@ export class SpeechManager {
   speakPart(parts, index, language, voice, isNarration, sequenceId) {
     if (
       !this.enabled
-      || document.hidden
       || sequenceId !== this.sequenceId
       || index >= parts.length
     ) {
@@ -183,7 +144,7 @@ export class SpeechManager {
     this.currentUtterance = utterance;
 
     const continueSequence = () => {
-      if (sequenceId !== this.sequenceId || document.hidden) return;
+      if (sequenceId !== this.sequenceId) return;
       this.currentUtterance = null;
 
       if (index + 1 >= parts.length) return;
@@ -200,11 +161,7 @@ export class SpeechManager {
       continueSequence();
     };
 
-    try {
-      this.synth.speak(utterance);
-    } catch {
-      this.currentUtterance = null;
-    }
+    this.synth.speak(utterance);
   }
 
   cancel() {
@@ -212,17 +169,11 @@ export class SpeechManager {
     window.clearTimeout(this.pauseTimer);
     this.pauseTimer = null;
     this.currentUtterance = null;
-    try {
-      this.synth?.cancel?.();
-    } catch {
-      // Safari có thể throw trong lúc page đang transition/background.
-    }
+    this.synth?.cancel?.();
   }
 
   dispose() {
     this.cancel();
-    window.clearTimeout(this.voiceRefreshTimer);
-    this.voiceRefreshTimer = null;
     this.synth?.removeEventListener?.('voiceschanged', this.onVoicesChanged);
     this.voices.length = 0;
   }
