@@ -1,36 +1,101 @@
 /**
  * AudioManager dùng Web Audio API cho các âm hiệu ứng đơn giản.
  * Khi cần âm thanh phức tạp, có thể registerSample(name, url) để thay bằng file thật.
+ *
+ * iOS/iPadOS có thể suspend/interrupted AudioContext khi Safari bị đưa xuống background,
+ * khóa màn hình hoặc có cuộc gọi. Manager luôn cố resume lại trong user gesture/foreground.
  */
 export class AudioManager {
   constructor() {
     this.context = null;
     this.enabled = localStorage.getItem('familygame-audio') !== 'off';
     this.samples = new Map();
+    this.disposed = false;
+    this.unlocked = false;
   }
 
-  async ensureContext() {
-    if (!this.enabled) return null;
+  getAudioContextClass() {
+    return window.AudioContext || window.webkitAudioContext || null;
+  }
 
-    if (!this.context) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return null;
-      this.context = new AudioContext();
+  async resumeContext() {
+    if (!this.context || !this.enabled || this.disposed) return this.context;
+
+    // Safari có thêm state `interrupted`; resume() cũng là cách khôi phục state này.
+    if (this.context.state === 'suspended' || this.context.state === 'interrupted') {
+      try {
+        await this.context.resume();
+      } catch {
+        // iOS có thể từ chối resume nếu chưa nằm trong user gesture.
+        // Lần pointerdown tiếp theo sẽ gọi unlockFromUserGesture() để thử lại.
+      }
     }
 
-    if (this.context.state === 'suspended') {
-      await this.context.resume();
-    }
-
+    if (this.context.state === 'running') this.unlocked = true;
     return this.context;
   }
 
-  setEnabled(enabled) {
-    this.enabled = enabled;
-    localStorage.setItem('familygame-audio', enabled ? 'on' : 'off');
+  async ensureContext() {
+    if (!this.enabled || this.disposed) return null;
 
-    if (!enabled && this.context?.state === 'running') {
-      this.context.suspend();
+    if (!this.context) {
+      const AudioContextClass = this.getAudioContextClass();
+      if (!AudioContextClass) return null;
+
+      try {
+        this.context = new AudioContextClass();
+      } catch {
+        return null;
+      }
+    }
+
+    await this.resumeContext();
+    return this.context;
+  }
+
+  /**
+   * Được gọi trực tiếp từ pointer/touch gesture của GameApp.
+   * Tạo/resume context sớm để các âm phát sau animation/timer vẫn có quyền phát trên iOS.
+   */
+  async unlockFromUserGesture() {
+    if (!this.enabled || this.disposed) return false;
+    const context = await this.ensureContext();
+    if (!context) return false;
+
+    // Một buffer im lặng rất ngắn giúp một số phiên bản Safari thực sự "unlock" output.
+    if (context.state === 'running' && !this.unlocked) {
+      try {
+        const buffer = context.createBuffer(1, 1, context.sampleRate);
+        const source = context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(context.destination);
+        source.start(0);
+        this.unlocked = true;
+      } catch {
+        // Không ảnh hưởng gameplay; các tone sau vẫn tiếp tục thử phát bình thường.
+      }
+    }
+
+    return context.state === 'running';
+  }
+
+  async handleForeground() {
+    if (!this.enabled || this.disposed || !this.context) return;
+    await this.resumeContext();
+  }
+
+  handleBackground() {
+    // Không chủ động suspend: Safari tự quản lý lifecycle và explicit suspend có thể khiến
+    // việc resume sau khi quay lại app khó hơn trên một số phiên bản iOS.
+  }
+
+  setEnabled(enabled) {
+    this.enabled = Boolean(enabled);
+    localStorage.setItem('familygame-audio', this.enabled ? 'on' : 'off');
+
+    if (!this.enabled && this.context?.state === 'running') {
+      this.context.suspend().catch?.(() => {});
+      this.unlocked = false;
     }
   }
 
@@ -49,7 +114,7 @@ export class AudioManager {
     delay = 0,
   } = {}) {
     const context = await this.ensureContext();
-    if (!context) return;
+    if (!context || context.state !== 'running') return;
 
     const startAt = context.currentTime + delay;
     const oscillator = context.createOscillator();
@@ -124,7 +189,7 @@ export class AudioManager {
     if (!sample) return;
 
     const context = await this.ensureContext();
-    if (!context) return;
+    if (!context || context.state !== 'running') return;
 
     if (!sample.buffer) {
       const response = await fetch(sample.url);
@@ -142,8 +207,13 @@ export class AudioManager {
   }
 
   dispose() {
+    this.disposed = true;
     this.samples.clear();
-    this.context?.close();
+    const context = this.context;
     this.context = null;
+    this.unlocked = false;
+    if (context && context.state !== 'closed') {
+      context.close().catch?.(() => {});
+    }
   }
 }
