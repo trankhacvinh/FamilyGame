@@ -61,6 +61,18 @@ export const GAME_REGISTRY = Object.freeze({
     loader: () => import('../games/claw/ClawMachineCleanUiGame.js'),
     exportName: 'ClawMachineCleanUiGame',
   },
+  [SCREEN.CROCODILE_BRUSH]: {
+    id: SCREEN.CROCODILE_BRUSH,
+    titleKey: 'brushTitle',
+    descriptionKey: 'brushDescription',
+    icon: '🐊',
+    accent: '#62c987',
+    category: 'life-skills',
+    minAge: 3,
+    type: '2.5D',
+    loader: () => import('../games/crocodile-brush/CrocodileBrushGame.js'),
+    exportName: 'CrocodileBrushGame',
+  },
 });
 
 export function getGameDefinition(screenId) {
