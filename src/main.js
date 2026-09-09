@@ -1,4 +1,5 @@
 import './styles.css';
+import './mobileCompatibility.css';
 import { GameApp } from './core/GameApp.js';
 
 const canvas = document.querySelector('#game-canvas');
