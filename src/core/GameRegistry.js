@@ -82,8 +82,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'observation',
     minAge: 3,
     type: '2.5D',
-    loader: () => import('../games/hidden-objects/HiddenObjectsSafeResetGame.js'),
-    exportName: 'HiddenObjectsSafeResetGame',
+    loader: () => import('../games/hidden-objects/HiddenObjectsStableGame.js'),
+    exportName: 'HiddenObjectsStableGame',
   },
 });
 
