@@ -31,7 +31,6 @@ export class AudioManager {
       }
     }
 
-    if (this.context.state === 'running') this.unlocked = true;
     return this.context;
   }
 
@@ -60,10 +59,10 @@ export class AudioManager {
   async unlockFromUserGesture() {
     if (!this.enabled || this.disposed) return false;
     const context = await this.ensureContext();
-    if (!context) return false;
+    if (!context || context.state !== 'running') return false;
 
     // Một buffer im lặng rất ngắn giúp một số phiên bản Safari thực sự "unlock" output.
-    if (context.state === 'running' && !this.unlocked) {
+    if (!this.unlocked) {
       try {
         const buffer = context.createBuffer(1, 1, context.sampleRate);
         const source = context.createBufferSource();
