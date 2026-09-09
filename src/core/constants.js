@@ -6,6 +6,7 @@ export const SCREEN = Object.freeze({
   FRUIT_CATCH: 'GAME_FRUIT_CATCH',
   CLAW: 'GAME_CLAW',
   CROCODILE_BRUSH: 'GAME_CROCODILE_BRUSH',
+  HIDDEN_OBJECTS: 'GAME_HIDDEN_OBJECTS',
 });
 
 export const LANGUAGE = Object.freeze({
