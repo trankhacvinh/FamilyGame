@@ -239,6 +239,9 @@ export class CrocodileBrushGame extends BaseGame {
       this.brush.add(bristle);
     }
 
+    // Brush children are added after the root was first tracked, so traverse once more
+    // to register their geometries for screen disposal.
+    this.trackObject(this.brush);
     this.scene.add(this.brush);
   }
 
