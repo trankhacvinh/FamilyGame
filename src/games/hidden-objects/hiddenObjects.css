@@ -24,6 +24,7 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   pointer-events: auto;
+  transition: opacity 160ms ease;
 }
 
 .hidden-prompt__clue {
@@ -86,11 +87,18 @@
   cursor: pointer;
   pointer-events: auto;
   touch-action: manipulation;
+  transition: opacity 160ms ease;
 }
 
 .hidden-reset:active {
   transform: translateY(4px);
   box-shadow: 0 2px 0 #55499a;
+}
+
+.hidden-objects-ui--complete .hidden-prompt,
+.hidden-objects-ui--complete .hidden-reset {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .hidden-toast {
