@@ -4,6 +4,7 @@ export const SCREEN = Object.freeze({
   SPACE: 'GAME_SPACE',
   ARCHAEOLOGY: 'GAME_ARCHAEOLOGY',
   FRUIT_CATCH: 'GAME_FRUIT_CATCH',
+  CLAW: 'GAME_CLAW',
 });
 
 export const LANGUAGE = Object.freeze({
