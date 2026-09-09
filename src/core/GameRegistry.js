@@ -58,8 +58,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'coordination',
     minAge: 3,
     type: '3D',
-    loader: () => import('../games/claw/ClawMachineGame.js'),
-    exportName: 'ClawMachineGame',
+    loader: () => import('../games/claw/ClawMachineCleanUiGame.js'),
+    exportName: 'ClawMachineCleanUiGame',
   },
 });
 
