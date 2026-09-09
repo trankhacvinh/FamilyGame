@@ -85,7 +85,8 @@ export class GameApp {
     document.addEventListener('visibilitychange', this.onVisibilityChange, { passive: true });
     window.visualViewport?.addEventListener('resize', this.onResize, { passive: true });
 
-    // Pointerdown là user activation tốt nhất để unlock Web Audio trên iOS.
+    // User gesture chỉ dùng để unlock Web Audio. Không can thiệp speech synthesis ở đây:
+    // Safari/iOS xử lý TTS ổn định hơn khi speak() được gọi trực tiếp từ game interaction.
     if ('PointerEvent' in window) {
       window.addEventListener('pointerdown', this.onUserGesture, { capture: true, passive: true });
     } else {
@@ -119,13 +120,11 @@ export class GameApp {
 
   onUserGesture() {
     this.audio.unlockFromUserGesture();
-    this.speech.unlockFromUserGesture();
   }
 
   onVisibilityChange() {
     if (document.hidden) {
       this.audio.handleBackground();
-      this.speech.handleBackground();
       return;
     }
 
@@ -134,7 +133,6 @@ export class GameApp {
 
   onPageHide(event) {
     this.audio.handleBackground();
-    this.speech.handleBackground();
 
     // Khi vào BFCache, RAF có thể không tự chạy lại trên một số bản Safari.
     if (event.persisted && this.rafId != null) {
@@ -154,7 +152,6 @@ export class GameApp {
 
   handleForeground() {
     this.audio.handleForeground();
-    this.speech.handleForeground();
 
     // Bỏ phần thời gian app nằm background để không làm animation nhảy một bước lớn.
     this.clock.getDelta();
