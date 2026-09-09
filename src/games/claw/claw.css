@@ -1,0 +1,235 @@
+.claw-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  color: #403b67;
+  font-weight: 900;
+}
+
+.claw-status {
+  position: absolute;
+  top: max(84px, calc(env(safe-area-inset-top) + 78px));
+  left: 50%;
+  width: min(88vw, 560px);
+  transform: translateX(-50%);
+  display: grid;
+  gap: 7px;
+  justify-items: center;
+  text-align: center;
+}
+
+.claw-score,
+.claw-message,
+.claw-collection {
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 6px 0 rgba(83, 70, 130, 0.13);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.claw-score {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: clamp(1rem, 3vw, 1.35rem);
+}
+
+.claw-message {
+  max-width: 92%;
+  padding: 7px 14px;
+  border-radius: 16px;
+  font-size: clamp(0.82rem, 2.4vw, 1.02rem);
+}
+
+.claw-collection {
+  position: absolute;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(108px, calc(env(safe-area-inset-bottom) + 104px));
+  max-width: min(56vw, 400px);
+  padding: 8px 11px;
+  border-radius: 18px;
+  font-size: 0.75rem;
+}
+
+.claw-collection strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.claw-collection__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.claw-collection__toy {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(111, 100, 153, 0.12);
+  filter: grayscale(0.9);
+  opacity: 0.38;
+  transition: transform 180ms ease, opacity 180ms ease, filter 180ms ease;
+}
+
+.claw-collection__toy--collected {
+  background: #fff1a6;
+  filter: none;
+  opacity: 1;
+  transform: translateY(-2px) scale(1.08);
+}
+
+.claw-controls {
+  position: absolute;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  pointer-events: auto;
+}
+
+.claw-drag-hint {
+  max-width: 210px;
+  padding: 9px 12px;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 5px 0 rgba(78, 68, 119, 0.12);
+  font-size: clamp(0.72rem, 2.3vw, 0.92rem);
+  text-align: center;
+  pointer-events: none;
+}
+
+.claw-grab-button,
+.claw-new-button {
+  border: 4px solid rgba(255, 255, 255, 0.94);
+  color: white;
+  font-weight: 1000;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.claw-grab-button {
+  min-width: 112px;
+  min-height: 72px;
+  padding: 10px 20px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #ff668e, #ff8d62);
+  box-shadow: 0 8px 0 #c84f68, 0 12px 26px rgba(102, 66, 112, 0.2);
+  font-size: clamp(1.12rem, 3.5vw, 1.55rem);
+}
+
+.claw-new-button {
+  min-height: 54px;
+  padding: 8px 13px;
+  border-radius: 19px;
+  background: #7666ca;
+  box-shadow: 0 6px 0 #55469d;
+  font-size: clamp(0.78rem, 2.3vw, 0.96rem);
+}
+
+.claw-grab-button:active:not(:disabled),
+.claw-new-button:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.claw-grab-button:disabled {
+  cursor: default;
+  filter: saturate(0.45);
+  opacity: 0.62;
+}
+
+.claw-complete {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(84vw, 560px);
+  padding: 24px;
+  transform: translate(-50%, -50%) scale(0.72);
+  border: 5px solid white;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #ff91bc, #ffe189, #9be6cb);
+  color: white;
+  box-shadow: 0 18px 46px rgba(53, 44, 91, 0.3);
+  text-align: center;
+  font-size: clamp(1.5rem, 6vw, 3.2rem);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 300ms cubic-bezier(.2, 1.5, .35, 1);
+  text-shadow: 0 3px 0 rgba(82, 68, 119, 0.18);
+}
+
+.claw-complete--show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+@media (max-width: 680px) {
+  .claw-status {
+    top: max(76px, calc(env(safe-area-inset-top) + 70px));
+  }
+
+  .claw-collection {
+    left: 50%;
+    bottom: max(104px, calc(env(safe-area-inset-bottom) + 102px));
+    max-width: 92vw;
+    transform: translateX(-50%);
+  }
+
+  .claw-collection strong {
+    display: none;
+  }
+
+  .claw-collection__items {
+    flex-wrap: nowrap;
+  }
+
+  .claw-collection__toy {
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+  }
+
+  .claw-controls {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    justify-content: center;
+  }
+
+  .claw-drag-hint {
+    display: none;
+  }
+
+  .claw-grab-button {
+    min-width: 128px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .claw-status {
+    top: max(68px, calc(env(safe-area-inset-top) + 62px));
+    width: min(56vw, 480px);
+  }
+
+  .claw-message {
+    display: none;
+  }
+
+  .claw-collection {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    max-width: 44vw;
+  }
+
+  .claw-controls {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .claw-grab-button {
+    min-height: 58px;
+  }
+}
