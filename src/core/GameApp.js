@@ -179,18 +179,6 @@ export class GameApp {
 
   onResize() {
     const { width, height } = getViewportSize();
-
-    if (width === this.viewport.width && height === this.viewport.height) {
-      // DPR có thể thay đổi dù CSS viewport không đổi (zoom/display mode).
-      const nextRatio = getSafePixelRatio();
-      if (nextRatio !== this.pixelRatio) {
-        this.pixelRatio = nextRatio;
-        this.renderer.setPixelRatio(nextRatio);
-        this.renderer.setSize(width, height, false);
-      }
-      return;
-    }
-
     this.viewport.width = width;
     this.viewport.height = height;
     this.pixelRatio = getSafePixelRatio();
