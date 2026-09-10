@@ -70,8 +70,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'life-skills',
     minAge: 3,
     type: '2.5D',
-    loader: () => import('../games/crocodile-brush/FriendlyCrocodileBrushGame.js'),
-    exportName: 'FriendlyCrocodileBrushGame',
+    loader: () => import('../games/crocodile-brush/StorybookCrocodileBrushGame.js'),
+    exportName: 'StorybookCrocodileBrushGame',
   },
   [SCREEN.HIDDEN_OBJECTS]: {
     id: SCREEN.HIDDEN_OBJECTS,
