@@ -178,4 +178,26 @@ export class FriendlyCrocodileBrushGame extends CrocodileBrushGame {
       }
     }
   }
+
+  brushTeeth(travel) {
+    super.brushTeeth(travel);
+
+    // The base game intentionally owns the cleaning algorithm. Reapply this
+    // visual layer's gentler plaque opacity after each cleaning step.
+    this.teeth.forEach((tooth) => {
+      if (!tooth.cleaned) tooth.dirtMaterial.opacity = 0.68 * (1 - tooth.progress);
+    });
+  }
+
+  startNewGame() {
+    super.startNewGame();
+
+    // Base reset uses the V1 tooth palette; restore the friendlier V2 palette.
+    this.teeth.forEach((tooth) => {
+      tooth.dirtMaterial.opacity = 0.68;
+      tooth.toothMaterial.color.setHex(0xfffdf1);
+      tooth.toothMaterial.emissive.setHex(0xfff4c8);
+      tooth.toothMaterial.emissiveIntensity = 0.025;
+    });
+  }
 }
