@@ -70,8 +70,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'life-skills',
     minAge: 3,
     type: '2.5D',
-    loader: () => import('../games/crocodile-brush/CrocodileBrushVisualGame.js'),
-    exportName: 'CrocodileBrushVisualGame',
+    loader: () => import('../games/crocodile-brush/FriendlyCrocodileBrushGame.js'),
+    exportName: 'FriendlyCrocodileBrushGame',
   },
   [SCREEN.HIDDEN_OBJECTS]: {
     id: SCREEN.HIDDEN_OBJECTS,
@@ -82,8 +82,8 @@ export const GAME_REGISTRY = Object.freeze({
     category: 'observation',
     minAge: 3,
     type: '2.5D',
-    loader: () => import('../games/hidden-objects/HiddenObjectsVisualShuffleGame.js'),
-    exportName: 'HiddenObjectsVisualShuffleGame',
+    loader: () => import('../games/hidden-objects/HiddenObjectsShuffleGame.js'),
+    exportName: 'HiddenObjectsShuffleGame',
   },
 });
 
