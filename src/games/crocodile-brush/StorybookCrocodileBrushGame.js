@@ -114,6 +114,7 @@ export class StorybookCrocodileBrushGame extends CrocodileBrushGame {
       this.ambientBubbles.push({
         mesh: bubble,
         baseY: y,
+        baseScale: scale,
         phase: index * 0.9,
       });
     });
@@ -232,34 +233,34 @@ export class StorybookCrocodileBrushGame extends CrocodileBrushGame {
     this.brush.position.set(this.brushWorld.x, this.brushWorld.y, 1.2);
 
     const handle = new THREE.Mesh(this.geometry.storyHandle, this.material.brushHandle);
-    handle.position.set(0, -1.22, 0);
+    handle.position.set(0, -1.28, 0);
     this.brush.add(handle);
 
     const handleTop = new THREE.Mesh(this.geometry.storyBrushCap, this.material.brushHandle);
-    handleTop.position.set(0, -0.2, 0);
+    handleTop.position.set(0, -0.27, 0);
     handleTop.scale.set(1.02, 1.02, 0.78);
     this.brush.add(handleTop);
 
     const handleBottom = new THREE.Mesh(this.geometry.storyBrushCap, this.material.brushHandle);
-    handleBottom.position.set(0, -2.24, 0);
+    handleBottom.position.set(0, -2.3, 0);
     handleBottom.scale.set(1.15, 1.15, 0.82);
     this.brush.add(handleBottom);
 
     const grip = new THREE.Mesh(this.geometry.storyGrip, this.material.brushGrip);
-    grip.position.set(0, -1.73, 0.01);
+    grip.position.set(0, -1.78, 0.01);
     this.brush.add(grip);
 
     const neck = new THREE.Mesh(this.geometry.storyNeck, this.material.brushHead);
-    neck.position.set(0, -0.04, 0);
+    neck.position.set(0, -0.18, 0);
     this.brush.add(neck);
 
     const head = new THREE.Mesh(this.geometry.storyBrushHead, this.material.brushHead);
-    head.position.set(0, 0.26, 0);
+    head.position.set(0, 0.11, 0);
     this.brush.add(head);
 
     [-0.42, 0.42].forEach((x) => {
       const cap = new THREE.Mesh(this.geometry.storyBrushCap, this.material.brushHead);
-      cap.position.set(x, 0.26, 0);
+      cap.position.set(x, 0.11, 0);
       cap.scale.set(0.96, 0.96, 0.72);
       this.brush.add(cap);
     });
@@ -269,7 +270,7 @@ export class StorybookCrocodileBrushGame extends CrocodileBrushGame {
         this.geometry.storyBristle,
         i % 2 === 0 ? this.material.bristleA : this.material.bristleB,
       );
-      bristle.position.set(-0.33 + i * 0.11, 0.5, 0.015);
+      bristle.position.set(-0.33 + i * 0.11, 0.34, 0.015);
       bristle.rotation.z = (i - 3) * 0.018;
       this.brush.add(bristle);
     }
@@ -277,8 +278,8 @@ export class StorybookCrocodileBrushGame extends CrocodileBrushGame {
     // Toothpaste foam makes the brush feel playful before the first swipe.
     [-0.18, 0.04, 0.24].forEach((x, index) => {
       const foam = new THREE.Mesh(this.geometry.storyBrushCap, this.material.storySpark);
-      foam.position.set(x, 0.62 + (index % 2) * 0.04, 0.02);
-      foam.scale.setScalar(0.33 + index * 0.035);
+      foam.position.set(x, 0.45 + (index % 2) * 0.035, 0.02);
+      foam.scale.setScalar(0.3 + index * 0.035);
       this.brush.add(foam);
     });
 
@@ -304,7 +305,7 @@ export class StorybookCrocodileBrushGame extends CrocodileBrushGame {
     this.ambientBubbles.forEach((bubble, index) => {
       bubble.mesh.position.y = bubble.baseY + Math.sin(this.storyTime * 0.75 + bubble.phase) * 0.08;
       const pulse = 1 + Math.sin(this.storyTime * 1.05 + index) * 0.035;
-      bubble.mesh.scale.setScalar(pulse * bubble.mesh.userData.baseScale || pulse);
+      bubble.mesh.scale.setScalar(bubble.baseScale * pulse);
     });
   }
 
