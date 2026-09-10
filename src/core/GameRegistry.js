@@ -13,6 +13,24 @@ export const GAME_REGISTRY = Object.freeze({
     loader: () => import('../games/shapes/ShapesSpeechGame.js'),
     exportName: 'ShapesSpeechGame',
   },
+  [SCREEN.ANIMAL_PUZZLE]: {
+    id: SCREEN.ANIMAL_PUZZLE,
+    title: {
+      vi: 'Ghép Hình Con Vật 🧩',
+      en: 'Animal Puzzle 🧩',
+    },
+    description: {
+      vi: 'Kéo các mảnh lớn vào đúng vị trí và khám phá con vật',
+      en: 'Drag the big pieces into place and discover the animal',
+    },
+    icon: '🧩',
+    accent: '#f09abb',
+    category: 'coordination',
+    minAge: 3,
+    type: '2D',
+    loader: () => import('../games/animal-puzzle/AnimalPuzzleGame.js'),
+    exportName: 'AnimalPuzzleGame',
+  },
   [SCREEN.SPACE]: {
     id: SCREEN.SPACE,
     titleKey: 'spaceTitle',
