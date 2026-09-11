@@ -60,10 +60,12 @@ export class MenuScreen {
       card.type = 'button';
       card.className = 'game-card';
       card.style.setProperty('--card-accent', game.accent);
+      const title = game.title?.[i18n.language] ?? i18n.t(game.titleKey);
+      const description = game.description?.[i18n.language] ?? i18n.t(game.descriptionKey);
       card.innerHTML = `
         <span class="game-card__icon" aria-hidden="true">${game.icon}</span>
-        <span class="game-card__title">${i18n.t(game.titleKey)}</span>
-        <span class="game-card__description">${i18n.t(game.descriptionKey)}</span>
+        <span class="game-card__title">${title}</span>
+        <span class="game-card__description">${description}</span>
         <span class="game-card__badge">${game.type}</span>
       `;
 
